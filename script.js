@@ -1,15 +1,11 @@
-// --- KONFIGURASI ELEMEN ---
 const formTabungan = document.getElementById('form-tabungan');
 const formJadwal = document.getElementById('form-jadwal');
-const wadahTabelSiswa = document.getElementById('isian'); // Untuk Tabel Siswa
+const wadahTabelSiswa = document.getElementById('isian');
 
-// --- FUNGSI GLOBAL (UNTUK AMBIL DATA) ---
 function ambilData(kunci) {
     const data = localStorage.getItem(kunci);
     return data ? JSON.parse(data) : [];
 }
-
-// --- 1. LOGIKA TABUNGAN SISWA ---
 
 formTabungan.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -50,12 +46,9 @@ function renderTabelSiswa() {
     });
 }
 
-// --- 2. LOGIKA JADWAL GURU ---
-
 formJadwal.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Mengambil nilai dari input form jadwal
     const waktu = document.getElementById('jam-mulai').value;
     const hari = document.getElementById('pilih-hari').value;
     const mapel = document.getElementById('pilih-mapel').value;
@@ -64,22 +57,15 @@ formJadwal.addEventListener('submit', function(e) {
 
     const jadwalBaru = { waktu, hari, mapel, kelas, guru };
 
-    // Simpan ke localStorage dengan kunci berbeda
     let dataJadwal = ambilData('daftarJadwal');
     dataJadwal.push(jadwalBaru);
     localStorage.setItem('daftarJadwal', JSON.stringify(dataJadwal));
-
-    // Feedback sederhana karena tabel jadwal belum kamu buat di HTML
     alert(`Jadwal berhasil disimpan!\n${guru} - ${mapel} (${hari}, ${waktu})`);
     
     formJadwal.reset();
 });
 
-// --- INISIALISASI ---
-// Jalankan render saat halaman dibuka
 renderTabelSiswa();
-
-// --- 3. LOGIKA ANALISIS NILAI SISWA ---
 
 const formNilai = document.getElementById('form-nilai');
 const wadahTabelNilai = document.getElementById('isian-nilai');
@@ -118,14 +104,12 @@ function renderTabelNilai() {
         row.insertCell(2).textContent = item.nilai;
         
         let cellStatus = row.insertCell(3);
-        // Memberi warna otomatis: Merah jika Remedial, Hijau jika Tuntas
         const warna = item.status === "Tuntas" ? "green" : "red";
         cellStatus.innerHTML = `<b style="color: ${warna}">${item.status}</b>`;
     });
 }
 
-// Tambahkan renderTabelNilai() ke dalam inisialisasi paling bawah
 document.addEventListener('DOMContentLoaded', () => {
     renderTabelSiswa();
-    renderTabelNilai(); // Pastikan data muncul saat refresh
+    renderTabelNilai();
 });
