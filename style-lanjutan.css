@@ -1,0 +1,44 @@
+:root { --p: #1a73e8; --p-h: #1557b0; --bg: #f8f9fa; --txt: #202124; --bd: #dadce0; --rad: 8px; --err: #d93025; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+body { background: var(--bg); color: var(--txt); padding: 20px; line-height: 1.6; }
+
+.container { background: #fff; max-width: 900px; margin: 0 auto 30px; padding: 25px; border-radius: var(--rad); border: 1px solid var(--bd); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+#login-section { max-width: 400px; text-align: center; margin-top: 10vh; }
+
+h2 { color: var(--p); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.container > p { color: #5f6368; margin-bottom: 15px; }
+hr { border: 0; border-top: 1px solid var(--bd); margin: 25px 0; }
+
+form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+form > div { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+form label { font-size: 0.8rem; font-weight: 600; color: #5f6368; }
+
+input, select { padding: 10px 14px; border: 1px solid var(--bd); border-radius: var(--rad); font-size: 0.9rem; transition: 0.2s; outline: none; }
+input:focus, select:focus { border-color: var(--p); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+
+button { cursor: pointer; padding: 10px 20px; border-radius: var(--rad); font-weight: 600; border: none; transition: 0.2s; }
+form button { background: var(--p); color: #fff; grid-column: 1 / -1; margin-top: 10px; }
+form button:hover { background: var(--p-h); transform: translateY(-1px); }
+
+#btn-logout, [id*='logout'] { background: var(--err); color: #fff; display: block; margin: 20px auto; }
+#btn-google > * { margin: 15px 0; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+thead th { background: #f1f3f4; text-align: left; padding: 12px; color: #5f6368; text-transform: uppercase; font-size: 0.7rem; }
+tbody td { padding: 12px; border-bottom: 1px solid #eee; }
+tbody tr:hover { background: #fcfcfc; }
+
+@media ( max-width: 600px) { .container { padding: 15px; } table { display: block; overflow-x: auto; } }
+
+.navbar { display: flex; justify-content: space-between; align-items: center; background: var(--p); color: white; padding: 15px 25px; border-radius: var(--rad); margin-bottom: 30px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2); }
+.nav-brand { font-weight: bold; font-size: 1.2rem; }
+
+.nav-user { display: flex; align-items: center; gap: 15px; }
+
+.btn-logout-small { background: #fff; color: var(--err); padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+
+.btn-logout-small:hover { background: #f8d7da; border-color: var(--err); }
+
+.badge { background: #e6f4ea; color: #1e7e34; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+.btn-del { background: var(--err); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
