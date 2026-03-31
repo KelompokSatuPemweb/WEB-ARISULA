@@ -1,0 +1,20 @@
+:root { --p: #1a73e8; --bd: #dadce0; --rad: 8px; --err: #d93025; }
+
+.container { background: #fff; padding: 25px; border-radius: var(--rad); border: 1px solid var(--bd); }
+
+.form-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+    gap: 12px; 
+}
+
+select, input { padding: 10px; border: 1px solid var(--bd); border-radius: var(--rad); }
+
+.btn-primary { background: var(--p); color: white; border: none; border-radius: var(--rad); cursor: pointer; font-weight: bold; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid var(--bd); }
+td { padding: 12px; border-bottom: 1px solid #eee; }
+
+.status-tuntas { color: #1e7e34; font-weight: bold; }
+.status-remedial { color: var(--err); font-weight: bold; }

@@ -1,0 +1,70 @@
+# -------------------------------------------------------------------
+# SEBEL PROJECT - MASTER GITIGNORE
+# -------------------------------------------------------------------
+
+# [DEPENDENCIES]
+# Menggunakan **/ agar menjangkau node_modules di BackEnd dan FrontEnd
+**/node_modules/
+**/node_modules
+.expo/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# [BUILD & OUTPUT]
+**/dist/
+**/web-build/
+**/build/
+**/out/
+.next/
+
+# [CONFIG & SENSITIVE DATA]
+# Jangan pernah upload file kredensial atau environment
+.env
+.env*.local
+.env.development
+.env.production
+config.js
+**/Data/*.sqlite
+**/Data/*.db
+
+# [MOBILE NATIVE (Expo/React Native)]
+**/ios/
+**/android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+.kotlin/
+
+# [METRO BUNDLER]
+.metro-health-check*
+**/ip-bundle.json
+
+# [DEBUG & LOGS]
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+logs
+*.log
+npm-error.log*
+
+# [SISTEM OPERASI]
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+*.pem
+
+# [IDE & EDITORS]
+.vscode/
+.idea/
+*.swp
+*.scratch
+.project
+.settings/
+
+# [TYPESCRIPT]
+*.tsbuildinfo
