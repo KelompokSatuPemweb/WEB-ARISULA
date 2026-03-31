@@ -1,190 +1,259 @@
-const formTabungan = document.getElementById('form-tabungan');
-const formJadwal = document.getElementById('form-jadwal');
-const wadahTabelSiswa = document.getElementById('isian');
-const formNilai = document.getElementById('form-nilai');
-const wadahTabelNilai = document.getElementById('isian-nilai');
+async function muatKomponen(idWadah, pathFile) {
+    const wadah = document.getElementById(idWadah);
+    try {
+        const response = await fetch(pathFile);
+        if (!response.ok) throw new Error("Gagal memuat: " + pathFile);
+        const html = await response.text();
+        wadah.innerHTML = html;
 
-function ambilData(kunci) {
-    const data = localStorage.getItem(kunci);
-    
-    if (data) {
-        return JSON.parse(data);
-    } else {
-        return [];
+        if (pathFile.includes('LoginForm.html')) {
+            inisialisasiLogin();
+        } 
+        else if (pathFile.includes('DashboardForm.html')) {
+            aktifkanNavigasiSidebar();
+        }
+        else if (pathFile.includes('TabunganSiswa.html')) {
+            inisialisasiTabungan();
+        }
+        else if (pathFile.includes('NilaiSiswa.html')) {
+            inisialisasiNilai();
+        }
+
+        else if (pathFile.includes('JadwalMengajar.html')) {
+            requestAnimationFrame(() => {
+                inisialisasiJadwal();
+            });
+        }
+    } catch (err) {
+        console.error(err);
     }
 }
 
-if (formTabungan) {
-    formTabungan.addEventListener('submit', function(e) {
-        e.preventDefault();
+function inisialisasiLogin() {
+    const form = document.getElementById('form-login');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nis = document.getElementById('login-siswa').value;
+            const pass = document.getElementById('password').value;
 
-        const nama = document.getElementById('nama').value;
-        const tglMasuk = document.getElementById('tgl-masuk').value;
-        const nominal = document.getElementById('nominal').value;
+            if (nis === "0123" && pass === "siswa") {
+                tampilkanDashboard();
+            } else {
+                alert("Login Gagal! Gunakan NIS: 0123 & Password: siswa");
+            }
+        });
+    }
 
-        const siswaBaru = {
-            nama: nama,
-            total: parseInt(nominal).toLocaleString('id-ID'),
-            masuk: tglMasuk,
-            keluar: "-",
-            status: "Lunas"
-        };
-
-        let dataSiswa = ambilData('daftarSiswa');
-        
-        dataSiswa.push(siswaBaru);
-        
-        localStorage.setItem(
-            'daftarSiswa', 
-            JSON.stringify(dataSiswa)
+    if (typeof google !== 'undefined') {
+        google.accounts.id.initialize({
+            client_id: CONFIG.GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
+        });
+        google.accounts.id.renderButton(
+            document.getElementById("btn-google"),
+            { theme: "outline", size: "large", width: "300" }
         );
+    }
+}
 
-        formTabungan.reset();
-        renderTabelSiswa();
+function handleCredentialResponse(response) {
+    console.log("Login Google Berhasil");
+    tampilkanDashboard();
+}
+
+function tampilkanDashboard() {
+    localStorage.setItem('isLoggedIn', 'true');
+    const app = document.getElementById('app-container');
+
+    app.innerHTML = `
+        <div id="sidebar-wrapper"></div>
+        <div id="main-wrapper">
+            <h1 id="welcome-text">Selamat Datang di SEBEL Dashboard</h1>
+            <div id="feature-content"></div>
+        </div>
+    `;
+
+    muatKomponen('sidebar-wrapper', 'Pages/DashboardForm.html');
+}
+
+function aktifkanNavigasiSidebar() {
+    const links = document.querySelectorAll('aside a');
+    links.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const halaman = link.getAttribute('href');
+            const welcome = document.getElementById('welcome-text');
+            if (welcome) welcome.style.display = 'none';
+            
+            muatKomponen('feature-content', `Pages/${halaman}`);
+        });
     });
 }
 
-function renderTabelSiswa() {
-    const dataSiswa = ambilData('daftarSiswa');
-    
-    if (!wadahTabelSiswa) return;
-    
-    wadahTabelSiswa.innerHTML = ""; 
+function inisialisasiNilai() {
+    renderTabelNilai();
 
-    dataSiswa.forEach(item => {
-        let row = wadahTabelSiswa.insertRow(); 
-        
-        let cellNama = row.insertCell(0);
-        let cellTotal = row.insertCell(1);
-        let cellMasuk = row.insertCell(2);
-        let cellKeluar = row.insertCell(3);
-        let cellStatus = row.insertCell(4);
+    const selectKelas = document.getElementById('pilih-kelas-wali');
+    if (selectKelas) {
+        selectKelas.addEventListener('change', updateDaftarSiswa);
+    }
 
-        cellNama.textContent = item.nama;
-        cellTotal.textContent = `Rp ${item.total}`;
-        cellMasuk.textContent = item.masuk;
-        cellKeluar.textContent = item.keluar;
-        
-        cellStatus.innerHTML = `<b>${item.status}</b>`;
-    });
-}
-
-if (formJadwal) {
-    formJadwal.addEventListener('submit', function(e) {
+    const form = document.getElementById('form-nilai');
+    form?.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        const waktu = document.getElementById('jam-mulai').value;
-        const hari = document.getElementById('pilih-hari').value;
-        const mapel = document.getElementById('pilih-mapel').value;
-        const kelas = document.getElementById('pilih-kelas').value;
-        const guru = document.getElementById('pilih-guru').value;
-
-        const jadwalBaru = { 
-            waktu, 
-            hari, 
-            mapel, 
-            kelas, 
-            guru 
+        const nilai = parseInt(document.getElementById('siswa-nilai').value);
+        const data = {
+            nama: document.getElementById('siswa-nama').value,
+            tugas: document.getElementById('tugas-ke').value,
+            nilai: nilai,
+            status: nilai >= 75 ? "Tuntas" : "Remedial"
         };
-
-        let dataJadwal = ambilData('daftarJadwal');
         
-        dataJadwal.push(jadwalBaru);
-        
-        localStorage.setItem(
-            'daftarJadwal', 
-            JSON.stringify(dataJadwal)
-        );
-        
-        alert(`Jadwal berhasil disimpan!\n${guru} - ${mapel}`);
-        
-        formJadwal.reset();
-    });
-}
-
-if (formNilai) {
-    formNilai.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const namaSiswa = document.getElementById('siswa-nama').value;
-        const mapelSiswa = document.getElementById('siswa-mapel').value;
-        const nilaiSiswa = document.getElementById('siswa-nilai').value;
-        const tglKumpul = document.getElementById('tgl-tugas').value;
-        const levelTugas = document.getElementById('tugas-ke').value;
-        const statusKelulusan = parseInt(nilaiSiswa) >= 75 ? "Tuntas" : "Remedial";
-
-        const dataNilaiBaru = {
-            nama: namaSiswa,
-            mapel: mapelSiswa,
-            nilai: nilaiSiswa,
-            tanggal: tglKumpul,
-            tugas: levelTugas,
-            status: statusKelulusan
-        };
-
-        let daftarNilai = ambilData('daftarNilai');
-        
-        daftarNilai.push(dataNilaiBaru);
-        
-        localStorage.setItem(
-            'daftarNilai', 
-            JSON.stringify(daftarNilai)
-        );
-
-        formNilai.reset();
+        simpanKeLS('db_nilai', data);
+        form.reset();
         renderTabelNilai();
     });
 }
 
 function renderTabelNilai() {
-    if (!wadahTabelNilai) return;
-    
-    const daftarNilai = ambilData('daftarNilai');
-    wadahTabelNilai.innerHTML = ""; 
+    const wadah = document.getElementById('isian-nilai');
+    if (!wadah) return;
 
-    daftarNilai.forEach(item => {
-        let row = wadahTabelNilai.insertRow(); 
-        
-        let cNama = row.insertCell(0);
-        let cMapel = row.insertCell(1);
-        let cTugas = row.insertCell(2);
-        let cTgl = row.insertCell(3);
-        let cNilai = row.insertCell(4);
-        
-        cNama.textContent = item.nama;
-        cMapel.textContent = item.mapel;
-        cTugas.textContent = `Tugas ${item.tugas}`;
-        cTgl.textContent = item.tanggal;
-        
-        const warna = item.status === "Tuntas" ? "green" : "red";
-        cNilai.innerHTML = `<b>${item.nilai}</b> <small style="color:${warna}">(${item.status})</small>`;
+    const data = ambilDariLS('db_nilai');
+    wadah.innerHTML = data.map((item, i) => `
+        <tr>
+            <td>${item.nama}</td>
+            <td>Tugas ${item.tugas}</td>
+            <td>${item.nilai}</td>
+            <td class="${item.status === 'Tuntas' ? 'status-tuntas' : 'status-remedial'}">${item.status}</td>
+            <td><button onclick="hapusDataGlobal('db_nilai', ${i}, renderTabelNilai)" class="btn-del">X</button></td>
+        </tr>
+    `).join('');
+}
+
+function inisialisasiTabungan() {
+    renderTabelTabungan();
+
+    const form = document.getElementById('form-tabungan');
+    form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = {
+            nama: document.getElementById('nama').value,
+            total: document.getElementById('nominal').value,
+            masuk: document.getElementById('tgl-masuk').value,
+            status: "Berhasil"
+        };
+
+        simpanKeLS('db_tabungan', data);
+        form.reset();
+        renderTabelTabungan();
     });
 }
 
+function renderTabelTabungan() {
+    const wadah = document.getElementById('isian');
+    if (!wadah) return;
+    
+    const data = ambilDariLS('db_tabungan');
+    wadah.innerHTML = data.map((item, i) => `
+        <tr>
+            <td>${item.nama}</td>
+            <td>Rp ${parseInt(item.total).toLocaleString()}</td>
+            <td>${item.masuk}</td>
+            <td><span class="badge">${item.status}</span></td>
+            <td><button onclick="hapusDataGlobal('db_tabungan', ${i}, renderTabelTabungan)" class="btn-del">X</button></td>
+        </tr>
+    `).join('');
+}
+
+function inisialisasiJadwal() {
+    renderTabelJadwal();
+
+    const form = document.getElementById('form-jadwal');
+    form?.addEventListener('submit', (e) => {
+        e.preventDefault(); // INI KUNCINYA agar tidak balik ke login
+
+        const data = {
+            hari: document.getElementById('pilih-hari').value,
+            mapel: document.getElementById('pilih-mapel').value,
+            jam: document.getElementById('jam-mulai').value
+        };
+
+        alert("Jadwal Berhasil Ditambahkan!");
+        simpanKeLS('db_jadwal', data);
+        form.reset();
+        renderTabelJadwal();
+    });
+}
+
+function renderTabelJadwal() {
+    const wadah = document.getElementById('isian-jadwal');
+    if (!wadah) {
+        console.error("Elemen 'isian-jadwal' tidak ditemukan di DOM!");
+        return;
+    }
+
+    const data = ambilDariLS('db_jadwal');
+    console.log("Data Jadwal yang diambil:", data);
+
+    if (data.length === 0) {
+        wadah.innerHTML = `<tr><td colspan="4">Belum ada jadwal.</td></tr>`;
+        return;
+    }
+
+    wadah.innerHTML = data.map((item, i) => `
+        <tr>
+            <td>${item.hari}</td>
+            <td>${item.jam}</td>
+            <td>${item.mapel}</td>
+            <td><button onclick="hapusDataGlobal('db_jadwal', ${i}, renderTabelJadwal)" class="btn-del">X</button></td>
+        </tr>
+    `).join('');
+}
+
+function simpanKeLS(kunci, dataBaru) {
+    let koleksi = ambilDariLS(kunci);
+    koleksi.push(dataBaru);
+    localStorage.setItem(kunci, JSON.stringify(koleksi));
+}
+
+function ambilDariLS(kunci) {
+    const data = localStorage.getItem(kunci);
+    return data ? JSON.parse(data) : [];
+}
+
+function hapusDataGlobal(kunci, index, callbackRender) {
+    if (confirm("Hapus data ini?")) {
+        let koleksi = ambilDariLS(kunci);
+        koleksi.splice(index, 1);
+        localStorage.setItem(kunci, JSON.stringify(koleksi));
+        callbackRender(); // Memanggil fungsi render milik halaman tsb
+    }
+}
+
 function updateDaftarSiswa() {
-    const kelasWali = document.getElementById('pilih-kelas-wali').value;
+    const kelas = document.getElementById('pilih-kelas-wali').value;
     const selectSiswa = document.getElementById('siswa-nama');
-
-    selectSiswa.innerHTML = '<option value="" disabled selected>-- Pilih Siswa --</option>';
-
-    const databaseSiswa = {
-        "1-A": ["Budi Santoso", "Siti Aminah"],
-        "2-B": ["Andi Wijaya", "Rina Pratama"],
-        "3-A": ["Eko Prasetyo", "Dewi Lestari"]
+    const db = {
+        "1-A": ["Budi Santoso", "Siti Aminah", "Ahmad Fauzi"],
+        "2-B": ["Andi Wijaya", "Rina Pratama", "Gita Gutawa"]
     };
 
-    if (databaseSiswa[kelasWali]) {
-        databaseSiswa[kelasWali].forEach(nama => {
-            let opt = document.createElement('option');
-            opt.value = nama;
-            opt.textContent = nama;
-            selectSiswa.appendChild(opt);
+    selectSiswa.innerHTML = '<option value="" disabled selected>Pilih Siswa</option>';
+    if (db[kelas]) {
+        db[kelas].forEach(n => {
+            let o = document.createElement('option');
+            o.value = o.textContent = n;
+            selectSiswa.appendChild(o);
         });
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("System Initialized...");
-    renderTabelSiswa();
-    renderTabelNilai();
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+        tampilkanDashboard();
+    } else {
+        muatKomponen('app-container', 'Pages/LoginForm.html');
+    }
 });

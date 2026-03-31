@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+    display: flex;
+    background-color: #f4f7f6;
+}
+
+aside {
+    width: 250px;
+    background-color: #1a73e8;
+    height: 100vh;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+aside a {
+    padding: 15px 25px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: 0.3s;
+    border-left: 4px solid transparent;
+}
+
+aside a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #fff;
+}
+
+#main-wrapper {
+    margin-left: 250px; 
+    padding: 30px;
+    width: 100%;
+}
