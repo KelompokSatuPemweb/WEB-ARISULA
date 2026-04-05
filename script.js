@@ -1,8 +1,13 @@
+import {clientID} from "./config.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (isLoggedIn === 'true') {
         const userName = localStorage.getItem('userName');
         tampilkanKontenUtama(userName);
+    } else {
+        document.getElementById("login-section").style.display = "block";
+        document.getElementById("main-content").style.display = "none";
     }
 });
 
@@ -14,7 +19,7 @@ if (formLogin) {
         const pass = document.getElementById('password').value;
 
         if (nis === "0123" && pass === "siswa0123") {
-            prosesLogin("Masuk");
+            prosesLogin("Admin/Masuk");
         } else if (nis.length >= 4 && pass === "siswa123") {
             prosesLogin("Siswa: " + nis);
         } else {
@@ -44,14 +49,9 @@ function logout() {
     location.reload();
 }
 
-function handleCredentialResponse(response) {
-    const user = decodeJwtResponse(response.credential);
-    prosesLogin(user.name);
-}
-
 window.onload = function () {
     google.accounts.id.initialize({
-        client_id: "574009629415-gaqu99i08or62jicrehuj2cqac4l01q8.apps.googleusercontent.com", 
+        client_id: clientID, 
         callback: handleCredentialResponse
     });
 
@@ -63,14 +63,7 @@ window.onload = function () {
 
 function handleCredentialResponse(response) {
     const user = decodeJwtResponse(response.credential);
-
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("main-content").style.display = "block";
-    
-    console.log("Login berhasil: " + user.name);
-    
-    renderTabelSiswa();
-    renderTabelNilai();
+    prosesLogin(user.name);
 }
 
 function decodeJwtResponse(token) {
@@ -80,10 +73,6 @@ function decodeJwtResponse(token) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
     return JSON.parse(jsonPayload);
-}
-
-function logout() {
-    location.reload();
 }
 
 const formTabungan = document.getElementById('form-tabungan');
@@ -129,70 +118,11 @@ function renderTabelSiswa() {
     dataSiswa.forEach((item, index) => {
         let row = wadahTabelSiswa.insertRow(); 
         row.insertCell(0).textContent = item.nama;
-        row.insertCell(1).textContent = `Rp ${item.total}`;
+        row.insertCell(1).textContent = `Rp ${item.total.toLocaleString('id-ID')}`;
         row.insertCell(2).textContent = item.masuk;
         row.insertCell(3).textContent = item.keluar;
         row.insertCell(4).innerHTML = `<b>${item.status}</b>`;
-        row.insertCell(5).innerHTML = `<button onclick="hapusData('daftarSiswa', ${index})" style="background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">Hapus</button>`;
-    });
-}
-
-if (formJadwal) {
-    formJadwal.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const waktu = document.getElementById('jam-mulai').value;
-        const hari = document.getElementById('pilih-hari').value;
-        const mapel = document.getElementById('pilih-mapel').value;
-        const kelas = document.getElementById('pilih-kelas').value;
-        const guru = document.getElementById('pilih-guru').value;
-
-        const jadwalBaru = { waktu, hari, mapel, kelas, guru };
-        let dataJadwal = ambilData('daftarJadwal');
-        dataJadwal.push(jadwalBaru);
-        localStorage.setItem('daftarJadwal', JSON.stringify(dataJadwal));
-        
-        alert(`Jadwal berhasil disimpan!\n${guru} - ${mapel}`);
-        formJadwal.reset();
-    });
-}
-
-if (formNilai) {
-    formNilai.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const namaSiswa = document.getElementById('siswa-nama').value;
-        const mapelSiswa = document.getElementById('siswa-mapel').value;
-        const nilaiSiswa = document.getElementById('siswa-nilai').value;
-        const tglKumpul = document.getElementById('tgl-tugas').value;
-        const levelTugas = document.getElementById('tugas-ke').value;
-        const statusKelulusan = parseInt(nilaiSiswa) >= 75 ? "Tuntas" : "Remedial";
-
-        const dataNilaiBaru = {
-            nama: namaSiswa, mapel: mapelSiswa, nilai: nilaiSiswa,
-            tanggal: tglKumpul, tugas: levelTugas, status: statusKelulusan
-        };
-
-        let daftarNilai = ambilData('daftarNilai');
-        daftarNilai.push(dataNilaiBaru);
-        localStorage.setItem('daftarNilai', JSON.stringify(daftarNilai));
-
-        formNilai.reset();
-        renderTabelNilai();
-    });
-}
-
-function renderTabelNilai() {
-    if (!wadahTabelNilai) return;
-    const daftarNilai = ambilData('daftarNilai');
-    wadahTabelNilai.innerHTML = ""; 
-    daftarNilai.forEach((item, index) => {
-        let row = wadahTabelNilai.insertRow(); 
-        row.insertCell(0).textContent = item.nama;
-        row.insertCell(1).textContent = item.mapel;
-        row.insertCell(2).textContent = `Tugas ${item.tugas}`;
-        row.insertCell(3).textContent = item.tanggal;
-        const warna = item.status === "Tuntas" ? "green" : "red";
-        row.insertCell(4).innerHTML = `<b>${item.nilai}</b> <small style="color:${warna}">(${item.status})</small>`;
-        row.insertCell(5).innerHTML = `<button onclick="hapusData('daftarNilai', ${index})" style="background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">Hapus</button>`;
+        row.insertCell(5).innerHTML = `<button onclick="hapusData('daftarSiswa', ${index})" class="btn-hapus">Hapus</button>`;
     });
 }
 
@@ -210,22 +140,53 @@ function updateDaftarSiswa() {
     if (databaseSiswa[kelasWali]) {
         databaseSiswa[kelasWali].forEach(nama => {
             let opt = document.createElement('option');
-            opt.value = nama;
+            opt.value = `${nama} (Kelas ${kelasWali})`;
             opt.textContent = nama;
             selectSiswa.appendChild(opt);
         });
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("System Initialized. Waiting for login...");
-});
+if (formNilai) {
+    formNilai.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const namaSiswa = document.getElementById('siswa-nama').value;
+        const mapelSiswa = document.getElementById('siswa-mapel').value;
+        const nilaiSiswa = document.getElementById('siswa-nilai').value;
+        const tglKumpul = document.getElementById('tgl-tugas').value;
+        const levelTugas = document.getElementById('tugas-ke').value;
+        const statusKelulusan = parseInt(nilaiSiswa) >= 75 ? "Tuntas" : "Remedial";
 
-function cariDataSiswa(kataKunci) {
-    const rows = document.querySelectorAll('#isian tr');
-    rows.forEach(row => {
-        const teksNama = row.cells[0].textContent.toLowerCase();
-        row.style.display = teksNama.includes(kataKunci.toLowerCase()) ? "" : "none";
+        const dataNilaiBaru = {
+            nama: namaSiswa, 
+            mapel: mapelSiswa, 
+            nilai: nilaiSiswa,
+            tanggal: tglKumpul, 
+            tugas: levelTugas, 
+            status: statusKelulusan
+        };
+
+        let daftarNilai = ambilData('daftarNilai');
+        daftarNilai.push(dataNilaiBaru);
+        localStorage.setItem('daftarNilai', JSON.stringify(daftarNilai));
+
+        formNilai.reset();
+        renderTabelNilai();
+    });
+}
+
+function renderTabelNilai() {
+    if (!wadahTabelNilai) return;
+    const daftarNilai = ambilData('daftarNilai');
+    wadahTabelNilai.innerHTML = ""; 
+    daftarNilai.slice().reverse().forEach((item, index) => {
+        let row = wadahTabelNilai.insertRow(); 
+        row.insertCell(0).textContent = item.nama;
+        row.insertCell(1).textContent = item.mapel;
+        row.insertCell(2).textContent = `Tugas ${item.tugas}`;
+        row.insertCell(3).textContent = item.tanggal;
+        const warna = item.status === "Tuntas" ? "green" : "red";
+        row.insertCell(4).innerHTML = `<b>${item.nilai}</b> <small style="color:${warna}">(${item.status})</small>`;
     });
 }
 
@@ -239,3 +200,7 @@ function hapusData(kunci, index) {
         if (kunci === 'daftarNilai') renderTabelNilai();
     }
 }
+
+window.updateDaftarSiswa = updateDaftarSiswa;
+window.logout = logout;
+window.hapusData = hapusData;
