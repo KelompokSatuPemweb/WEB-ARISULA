@@ -1,0 +1,29 @@
+{
+    "databaseSiswa": {
+        "1-A": ["Budi Santoso", "Siti Aminah", "Rizky Pratama"],
+        "2-B": ["Andi Wijaya", "Rina Pratama", "Fajar Sadboy"],
+        "3-C": ["Eko Prasetyo", "Dewi Lestari", "Bambang Pamungkas"],
+        "4-A": ["Hendra Wahyudi", "Siska Putri"],
+        "5-B": ["Gading Marten", "Gisel Anastasia"],
+        "6-C": ["Joko Anwar", "Rudy Habibie"]
+    }, 
+    "daftarMapel": [
+        "Matematika",
+        "IPA Terpadu",
+        "Informatika",
+        "Bahasa Inggris",
+        "Ekonomi Dasar"
+    ], 
+    "daftarGuru": [
+        {"id": "G01", "nama": "Pak Budi, S.Pd", "pakar": "Matematika"},
+        {"id": "G02", "nama": "Ibu Siti, M.Pd", "pakar": "IPA"},
+        {"id": "G03", "nama": "Pak Andi, S.Kom", "pakar": "Informatika"}
+    ], 
+    "daftarHari": [
+        "Senin", 
+        "Selasa", 
+        "Rabu", 
+        "Kamis", 
+        "Jumat"
+    ]
+}

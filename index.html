@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="style.css">
+    <title>SEBEL - Sekolah Belajar</title>
+</head>
+<body>
+    <div class="container" id="login-section">
+        <h2>Login SEBEL</h2>
+        <form id="form-login" class="form-vertical">
+            <input type="text" id="login-siswa" placeholder="NIS / Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit" id="btn-login-manual">Login</button>
+        </form>
+        <p id="user-info">Silakan login</p>
+        <div id="btn-google"></div>
+    </div>
+
+    <div id="main-content" style="display:none;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <p id="user-info-display" style="font-weight: bold;"></p>
+            <div>
+                <button onclick="navigasiKe('analisis')" id="btn-ke-analisis" class="btn-primary">Analisis Keuangan</button>
+                <button onclick="navigasiKe('beranda')" id="btn-back" class="btn-secondary" style="display:none;">Back to Home</button>
+            </div>
+        </div>
+
+        <div id="page-beranda">
+            <div class="container">
+                <h2>Input Tabungan Siswa</h2>
+                <form id="form-tabungan" class="form-inline">
+                    <div class="field">
+                        <label>Pilih Kelas</label>
+                        <select id="pilih-kelas-tabungan" required onchange="updateDaftarSiswaTabungan()"></select>
+                    </div>
+                    <div class="field">
+                        <label>Nama Siswa</label>
+                        <select id="nama" required>
+                            <option value="" disabled selected>-- Pilih Siswa --</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Tanggal (Otomatis)</label>
+                        <input type="date" id="tgl-masuk" required readonly>
+                    </div>
+                    <div class="field">
+                        <label>Nominal (Rp)</label>
+                        <input type="number" id="nominal" placeholder="Contoh: 50000" required>
+                    </div>
+                    <button type="submit" id="btn-simpan" class="btn-primary">Simpan Data</button>
+                </form>
+                <hr>
+                <div class="table-responsive">
+                    <table class="tabel" id="tabel-siswa">
+                        <thead>
+                            <tr class="baris-judul">
+                                <th>Nama Siswa</th>
+                                <th>Total Pemasukkan</th>
+                                <th>Tgl Masuk</th>
+                                <th>Tgl Keluar</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isian"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="container">
+                <h2>Input Jadwal Mengajar Guru</h2>
+                <form id="form-jadwal" class="form-grid">
+                    <div class="field">
+                        <label>Waktu Mulai</label>
+                        <input type="time" id="jam-mulai" min="07:00" max="15:00" required>
+                    </div>
+                    <div class="field">
+                        <label>Hari</label>
+                        <select id="pilih-hari" required></select>
+                    </div>
+                    <div class="field">
+                        <label>Mata Pelajaran</label>
+                        <select id="pilih-mapel" required></select>
+                    </div>
+                    <div class="field">
+                        <label>Kelas</label>
+                        <select id="pilih-kelas" required></select>
+                    </div>
+                    <div class="field full-width">
+                        <label>Guru Pengajar</label>
+                        <select id="pilih-guru" required></select>
+                    </div>
+                    <button type="submit" id="btn-simpan-jadwal" class="btn-primary full-width">Tambahkan ke Jadwal</button>
+                </form>
+                <hr>
+                <div class="table-responsive">
+                    <table class="tabel">
+                        <thead>
+                            <tr class="baris-judul">
+                                <th>Jam</th>
+                                <th>Hari</th>
+                                <th>Mapel</th>
+                                <th>Kelas</th>
+                                <th>Guru</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isian-jadwal"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="container">
+                <h2>Analisis Nilai Siswa</h2>
+                <form id="form-nilai" class="form-grid">
+                    <div class="field">
+                        <label>Wali Kelas Dari</label>
+                        <select id="pilih-kelas-wali" required onchange="updateDaftarSiswa()"></select>
+                    </div>
+                    <div class="field">
+                        <label>Nama Siswa</label>
+                        <select id="siswa-nama" required></select>
+                    </div>
+                    <div class="field">
+                        <label>Mata Pelajaran</label>
+                        <select id="siswa-mapel" required></select>
+                    </div>
+                    <div class="field">
+                        <label>Tugas Ke-</label>
+                        <input type="number" id="tugas-ke" min="1" required>
+                    </div>
+                    <div class="field">
+                        <label>Tanggal Kumpul</label>
+                        <input type="date" id="tgl-tugas" required readonly>
+                    </div>
+                    <div class="field">
+                        <label>Nilai (0-100)</label>
+                        <input type="number" id="siswa-nilai" min="0" max="100" required>
+                    </div>
+                    <button type="submit" id="btn-simpan-nilai" class="btn-primary full-width">Simpan Analisis</button>
+                </form>
+                <hr>
+                <div class="table-responsive">
+                    <table class="tabel">
+                        <thead>
+                            <tr class="baris-judul">
+                                <th>Siswa (Kelas)</th>
+                                <th>Mapel</th>
+                                <th>Tugas</th>
+                                <th>Tgl Kumpul</th>
+                                <th>Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isian-nilai"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-analisis" style="display:none;">
+            <div class="container">
+                <h2>Analisis Keuangan Kelas Anda</h2>
+                <div class="table-responsive">
+                    <table class="tabel">
+                        <thead>
+                            <tr>
+                                <th>Nama Siswa</th>
+                                <th>Status</th>
+                                <th>Total Saldo</th>
+                                <th>Analisis Kelayakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isian-analisis"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 50px;">
+            <button onclick="logout()" class="btn-danger">Logout dari Sistem</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
