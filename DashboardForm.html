@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SEBEL</title>
+    <link rel="stylesheet" href="Styles/main.css">
+    <link rel="stylesheet" href="Styles/Components.css">
+    <link rel="stylesheet" href="Styles/DashboardForm.css">
+</head>
+<body>
+    <div class="layout">
+        <aside>
+            <div class="sidebar-logo">
+                <h3>SEBEL</h3>
+            </div>
+            <nav>
+                <a href="./DashboardForm.html" class="active">🏠 <span>Dashboard</span></a>
+                <a href="./TabunganSiswa.html">💰 <span>Tabungan</span></a>
+                <a href="./NilaiSiswa.html">📊 <span>Nilai</span></a>
+                <a href="./JadwalMengajar.html">📅 <span>Jadwal</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">🚪 <span>Logout Sistem</span></button>
+            </div>
+        </aside>
+
+        <div id="main-wrapper">
+            <header>
+                <div class="user-profile">
+                    <span id="display-user-name">👤 Memuat...</span>
+                </div>
+            </header>
+
+            <main class="container">
+                <div class="welcome-box">
+                    <h1 id="welcome-message">Selamat Datang!</h1>
+                    <p>Kelola data akademik dengan aman dan efisien melalui sistem SEBEL.</p>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h4>📡 Koneksi Database</h4>
+                        <p style="color: #27ae60;">Terhubung ke PostgreSQL</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔔 Notifikasi</h4>
+                        <p>0 Pesan Belum Dibaca</p>
+                    </div>
+                    <div class="card">
+                        <h4>📅 Hari Ini</h4>
+                        <p id="current-day">Memuat Tanggal...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script type="module">
+        import { cekAkses } from "./script.js";
+        
+        cekAkses(); 
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = localStorage.getItem('userName') || 'Guru';
+            const displayElement = document.getElementById('display-user-name');
+            const welcomeElement = document.getElementById('welcome-message');
+            const dayElement = document.getElementById('current-day');
+
+            if (displayElement) displayElement.textContent = `👤 ${userName}`;
+            if (welcomeElement) welcomeElement.textContent = `Selamat Datang, ${userName}!`;
+
+            if (dayElement) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const today = new Date().toLocaleDateString('id-ID', options);
+                dayElement.textContent = today;
+            }
+        });
+    </script>
+</body>
+</html>

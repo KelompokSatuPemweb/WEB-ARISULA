@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Guru - SEBEL</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="Styles/Login.css">
+</head>
+<body>
+    <div id="login-section">
+        <div class="login-header">
+            <h2>Login SEBEL</h2>
+            <p>Masuk sebagai Guru</p>
+        </div>
+        
+        <form id="form-login">
+            <div class="input-group">
+                <input type="email" id="login-email" placeholder="Email Guru (@sebel.sch.id)" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" class="btn-primary">Login</button>
+            </div>
+        </form>
+        <div class="separator"><span>atau</span></div>
+        <div id="btn-google"></div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

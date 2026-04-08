@@ -1,259 +1,196 @@
-async function muatKomponen(idWadah, pathFile) {
-    const wadah = document.getElementById(idWadah);
+import { config } from "./config.js";
+
+const clientID = config;
+const BASE_URL = "http://localhost:3000/api";
+
+export async function ambilDariServer(endpoint) {
+    const token = localStorage.getItem('token');
     try {
-        const response = await fetch(pathFile);
-        if (!response.ok) throw new Error("Gagal memuat: " + pathFile);
-        const html = await response.text();
-        wadah.innerHTML = html;
-
-        if (pathFile.includes('LoginForm.html')) {
-            inisialisasiLogin();
-        } 
-        else if (pathFile.includes('DashboardForm.html')) {
-            aktifkanNavigasiSidebar();
-        }
-        else if (pathFile.includes('TabunganSiswa.html')) {
-            inisialisasiTabungan();
-        }
-        else if (pathFile.includes('NilaiSiswa.html')) {
-            inisialisasiNilai();
-        }
-
-        else if (pathFile.includes('JadwalMengajar.html')) {
-            requestAnimationFrame(() => {
-                inisialisasiJadwal();
-            });
-        }
-    } catch (err) {
-        console.error(err);
+        const response = await fetch(`${BASE_URL}/${endpoint}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error("Gagal mengambil data");
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        return null;
     }
 }
 
-function inisialisasiLogin() {
-    const form = document.getElementById('form-login');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nis = document.getElementById('login-siswa').value;
-            const pass = document.getElementById('password').value;
-
-            if (nis === "0123" && pass === "siswa") {
-                tampilkanDashboard();
-            } else {
-                alert("Login Gagal! Gunakan NIS: 0123 & Password: siswa");
-            }
-        });
+export async function inisialisasiDataMaster() {
+    const token = localStorage.getItem('token');
+    
+    const selectHari = document.getElementById('pilih-hari');
+    if (selectHari && selectHari.options.length <= 1) {
+        const hariArr = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        hariArr.forEach(h => selectHari.add(new Option(h, h)));
     }
+
+    const selectKelas = document.getElementById('pilih-kelas');
+    if (selectKelas) {
+        const resKelas = await fetch(`${BASE_URL}/daftar-kelas`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const dataKelas = await resKelas.json();
+        selectKelas.innerHTML = '<option value="" disabled selected>-- Pilih Kelas --</option>';
+        dataKelas.forEach(k => selectKelas.add(new Option(k.nama_kelas, k.id_rombel)));
+    }
+
+    const selectMapel = document.getElementById('pilih-mapel');
+    if (selectMapel) {
+        const resMapel = await fetch(`${BASE_URL}/daftar-mapel`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const dataMapel = await resMapel.json();
+        selectMapel.innerHTML = '<option value="" disabled selected>-- Pilih Mapel --</option>';
+        dataMapel.forEach(m => selectMapel.add(new Option(m.mapel, m.id_mapel)));
+    }
+}
+
+export async function simpanKeServer(endpoint, payload, callback) {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`${BASE_URL}/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+            if (callback) callback();
+        } else {
+            alert("Gagal menyimpan data ke server.");
+        }
+    } catch (error) {
+        console.error("Post Error:", error);
+    }
+}
+
+export async function hapusDiServer(endpoint, id, callback) {
+    const token = localStorage.getItem('token');
+    if (!confirm("Yakin ingin menghapus data ini?")) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/${endpoint}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            if (callback) callback();
+        }
+    } catch (error) {
+        console.error("Delete Error:", error);
+    }
+}
+
+async function prosesLogin(nama, google_id = "manual") {
+    try {
+        const response = await fetch(`${BASE_URL}/proses-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nama, google_id })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+
+        if (data.success) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userName', data.user.nama);
+            window.location.replace('./DashboardForm.html');
+        }
+    } catch (error) {
+        alert("Login Gagal: " + error.message);
+    }
+}
+
+window.handleCredentialResponse = (response) => {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    prosesLogin(payload.name, payload.sub);
+};
+
+function inisialisasiGoogle() {
+    const btn = document.getElementById("btn-google");
+    if (!btn) return;
 
     if (typeof google !== 'undefined') {
         google.accounts.id.initialize({
-            client_id: CONFIG.GOOGLE_CLIENT_ID,
-            callback: handleCredentialResponse
+            client_id: clientID,
+            callback: window.handleCredentialResponse
         });
-        google.accounts.id.renderButton(
-            document.getElementById("btn-google"),
-            { theme: "outline", size: "large", width: "300" }
-        );
-    }
-}
-
-function handleCredentialResponse(response) {
-    console.log("Login Google Berhasil");
-    tampilkanDashboard();
-}
-
-function tampilkanDashboard() {
-    localStorage.setItem('isLoggedIn', 'true');
-    const app = document.getElementById('app-container');
-
-    app.innerHTML = `
-        <div id="sidebar-wrapper"></div>
-        <div id="main-wrapper">
-            <h1 id="welcome-text">Selamat Datang di SEBEL Dashboard</h1>
-            <div id="feature-content"></div>
-        </div>
-    `;
-
-    muatKomponen('sidebar-wrapper', 'Pages/DashboardForm.html');
-}
-
-function aktifkanNavigasiSidebar() {
-    const links = document.querySelectorAll('aside a');
-    links.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const halaman = link.getAttribute('href');
-            const welcome = document.getElementById('welcome-text');
-            if (welcome) welcome.style.display = 'none';
-            
-            muatKomponen('feature-content', `Pages/${halaman}`);
-        });
-    });
-}
-
-function inisialisasiNilai() {
-    renderTabelNilai();
-
-    const selectKelas = document.getElementById('pilih-kelas-wali');
-    if (selectKelas) {
-        selectKelas.addEventListener('change', updateDaftarSiswa);
-    }
-
-    const form = document.getElementById('form-nilai');
-    form?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nilai = parseInt(document.getElementById('siswa-nilai').value);
-        const data = {
-            nama: document.getElementById('siswa-nama').value,
-            tugas: document.getElementById('tugas-ke').value,
-            nilai: nilai,
-            status: nilai >= 75 ? "Tuntas" : "Remedial"
-        };
-        
-        simpanKeLS('db_nilai', data);
-        form.reset();
-        renderTabelNilai();
-    });
-}
-
-function renderTabelNilai() {
-    const wadah = document.getElementById('isian-nilai');
-    if (!wadah) return;
-
-    const data = ambilDariLS('db_nilai');
-    wadah.innerHTML = data.map((item, i) => `
-        <tr>
-            <td>${item.nama}</td>
-            <td>Tugas ${item.tugas}</td>
-            <td>${item.nilai}</td>
-            <td class="${item.status === 'Tuntas' ? 'status-tuntas' : 'status-remedial'}">${item.status}</td>
-            <td><button onclick="hapusDataGlobal('db_nilai', ${i}, renderTabelNilai)" class="btn-del">X</button></td>
-        </tr>
-    `).join('');
-}
-
-function inisialisasiTabungan() {
-    renderTabelTabungan();
-
-    const form = document.getElementById('form-tabungan');
-    form?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const data = {
-            nama: document.getElementById('nama').value,
-            total: document.getElementById('nominal').value,
-            masuk: document.getElementById('tgl-masuk').value,
-            status: "Berhasil"
-        };
-
-        simpanKeLS('db_tabungan', data);
-        form.reset();
-        renderTabelTabungan();
-    });
-}
-
-function renderTabelTabungan() {
-    const wadah = document.getElementById('isian');
-    if (!wadah) return;
-    
-    const data = ambilDariLS('db_tabungan');
-    wadah.innerHTML = data.map((item, i) => `
-        <tr>
-            <td>${item.nama}</td>
-            <td>Rp ${parseInt(item.total).toLocaleString()}</td>
-            <td>${item.masuk}</td>
-            <td><span class="badge">${item.status}</span></td>
-            <td><button onclick="hapusDataGlobal('db_tabungan', ${i}, renderTabelTabungan)" class="btn-del">X</button></td>
-        </tr>
-    `).join('');
-}
-
-function inisialisasiJadwal() {
-    renderTabelJadwal();
-
-    const form = document.getElementById('form-jadwal');
-    form?.addEventListener('submit', (e) => {
-        e.preventDefault(); // INI KUNCINYA agar tidak balik ke login
-
-        const data = {
-            hari: document.getElementById('pilih-hari').value,
-            mapel: document.getElementById('pilih-mapel').value,
-            jam: document.getElementById('jam-mulai').value
-        };
-
-        alert("Jadwal Berhasil Ditambahkan!");
-        simpanKeLS('db_jadwal', data);
-        form.reset();
-        renderTabelJadwal();
-    });
-}
-
-function renderTabelJadwal() {
-    const wadah = document.getElementById('isian-jadwal');
-    if (!wadah) {
-        console.error("Elemen 'isian-jadwal' tidak ditemukan di DOM!");
-        return;
-    }
-
-    const data = ambilDariLS('db_jadwal');
-    console.log("Data Jadwal yang diambil:", data);
-
-    if (data.length === 0) {
-        wadah.innerHTML = `<tr><td colspan="4">Belum ada jadwal.</td></tr>`;
-        return;
-    }
-
-    wadah.innerHTML = data.map((item, i) => `
-        <tr>
-            <td>${item.hari}</td>
-            <td>${item.jam}</td>
-            <td>${item.mapel}</td>
-            <td><button onclick="hapusDataGlobal('db_jadwal', ${i}, renderTabelJadwal)" class="btn-del">X</button></td>
-        </tr>
-    `).join('');
-}
-
-function simpanKeLS(kunci, dataBaru) {
-    let koleksi = ambilDariLS(kunci);
-    koleksi.push(dataBaru);
-    localStorage.setItem(kunci, JSON.stringify(koleksi));
-}
-
-function ambilDariLS(kunci) {
-    const data = localStorage.getItem(kunci);
-    return data ? JSON.parse(data) : [];
-}
-
-function hapusDataGlobal(kunci, index, callbackRender) {
-    if (confirm("Hapus data ini?")) {
-        let koleksi = ambilDariLS(kunci);
-        koleksi.splice(index, 1);
-        localStorage.setItem(kunci, JSON.stringify(koleksi));
-        callbackRender(); // Memanggil fungsi render milik halaman tsb
-    }
-}
-
-function updateDaftarSiswa() {
-    const kelas = document.getElementById('pilih-kelas-wali').value;
-    const selectSiswa = document.getElementById('siswa-nama');
-    const db = {
-        "1-A": ["Budi Santoso", "Siti Aminah", "Ahmad Fauzi"],
-        "2-B": ["Andi Wijaya", "Rina Pratama", "Gita Gutawa"]
-    };
-
-    selectSiswa.innerHTML = '<option value="" disabled selected>Pilih Siswa</option>';
-    if (db[kelas]) {
-        db[kelas].forEach(n => {
-            let o = document.createElement('option');
-            o.value = o.textContent = n;
-            selectSiswa.appendChild(o);
-        });
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-        tampilkanDashboard();
+        google.accounts.id.renderButton(btn, { theme: "outline", size: "large" });
     } else {
-        muatKomponen('app-container', 'Pages/LoginForm.html');
+        setTimeout(inisialisasiGoogle, 500);
     }
+}
+
+export function cekAkses() {
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.replace('./LoginForm.html'); // Sesuaikan dengan nama file loginmu
+    }
+}
+
+export function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency', currency: 'IDR', minimumFractionDigits: 0
+    }).format(angka);
+}
+
+export async function muatDataMaster() {
+    const response = await fetch('./data.json');
+    return await response.json();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    inisialisasiGoogle();
+    
+    const formLogin = document.getElementById('form-login');
+    if (formLogin) {
+        formLogin.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            if (email.endsWith("@sebel.sch.id")) {
+                prosesLogin(email.split('@')[0].replace('.', ' '));
+            } else {
+                alert("Gunakan email @sebel.sch.id!");
+            }
+        });
+    }
+});
+
+export async function updateDaftarSiswaDinamis(idSelectKelas, idSelectSiswa) {
+    const idRombel = document.getElementById(idSelectKelas)?.value;
+    const selectSiswa = document.getElementById(idSelectSiswa);
+    const token = localStorage.getItem('token');
+    
+    if (!selectSiswa || !idRombel) return;
+
+    selectSiswa.innerHTML = '<option value="">Memuat...</option>';
+
+    try {
+        const response = await fetch(`${BASE_URL}/daftar-siswa/${idRombel}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const daftarSiswa = await response.json();
+
+        selectSiswa.innerHTML = '<option value="" disabled selected>-- Pilih Siswa --</option>';
+        daftarSiswa.forEach(siswa => {
+            selectSiswa.add(new Option(siswa.nama_siswa, siswa.nis)); 
+        });
+    } catch (err) {
+        console.error("Gagal memuat siswa:", err);
+        selectSiswa.innerHTML = '<option value="">Gagal memuat</option>';
+    }
+}
+
+export function logout() {
+    localStorage.clear();
+    window.location.replace('./LoginForm.html');
+}
+
+Object.assign(window, { 
+    prosesLogin, 
+    formatRupiah, 
+    cekAkses, 
+    logout, 
+    updateDaftarSiswaDinamis 
 });

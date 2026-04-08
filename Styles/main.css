@@ -1,0 +1,81 @@
+:root {
+    --p: #d93025; /* Merah Google / Brand */
+    --p-h: #b31412;
+    --bg: #f8f9fa;
+    --txt: #202124;
+    --bd: #dadce0;
+    --white: #ffffff;
+    --sidebar-width: 260px;
+    --rad: 12px;
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+}
+
+body { 
+    background: var(--bg); 
+    color: var(--txt); 
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Layout MPA */
+.layout {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar Styling */
+aside {
+    width: var(--sidebar-width);
+    background: var(--white);
+    border-right: 1px solid var(--bd);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: fixed;
+    height: 100vh;
+}
+
+aside a {
+    padding: 12px 25px;
+    text-decoration: none;
+    color: #5f6368;
+    font-weight: 500;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+aside a:hover {
+    background: #f1f3f4;
+    color: var(--p);
+}
+
+aside a.active {
+    background: #fce8e6;
+    color: var(--p);
+    border-radius: 0 25px 25px 0;
+    margin-right: 10px;
+}
+
+/* Main Content Area */
+main {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 40px;
+    max-width: 1100px;
+}
+
+.container {
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--rad);
+    border: 1px solid var(--bd);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}

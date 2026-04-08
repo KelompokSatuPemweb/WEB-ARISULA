@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Mengajar - SEBEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d93025;
+            --primary-dark: #b31412;
+            --bg-body: #f8f9fa;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --border: #dadce0;
+            --sidebar-width: 260px;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-logo { padding: 30px 25px; border-bottom: 1px solid var(--border); }
+        .sidebar-logo h3 { color: var(--primary); font-weight: 700; letter-spacing: -0.5px; }
+
+        nav { padding: 20px 0; flex-grow: 1; }
+        nav a {
+            padding: 12px 25px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover { background: #f1f3f4; color: var(--primary); }
+        nav a.active {
+            background: #fce8e6;
+            color: var(--primary);
+            border-radius: 0 25px 25px 0;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .btn-logout {
+            width: 100%; padding: 10px; background: #f1f3f4; border: none;
+            border-radius: 8px; color: var(--text-muted); cursor: pointer;
+            font-weight: 600; transition: 0.2s;
+        }
+        .btn-logout:hover { background: var(--primary); color: white; }
+
+        /* Main Content */
+        #main-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        header h2 { font-size: 1.5rem; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+
+        input, select {
+            padding: 10px 12px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 0.9rem; background: white;
+        }
+
+        .btn-primary {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 20px; border-radius: 6px; font-weight: 600;
+            cursor: pointer; height: 41px; margin-top: auto;
+        }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th {
+            text-align: left; padding: 12px 16px; background: #f1f3f4;
+            color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+        }
+        td { padding: 16px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+
+        .badge-kelas {
+            background: #e8f0fe; color: #1967d2;
+            padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 0.8rem;
+        }
+
+        .btn-hapus {
+            background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+        }
+        .btn-hapus:hover { background: var(--primary); color: white; }
+
+        @media (max-width: 768px) {
+            aside { width: 70px; }
+            nav a span, .sidebar-logo h3, .sidebar-footer span { display: none; }
+            #main-wrapper { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <div class="sidebar-logo"><h3>SEBEL</h3></div>
+        <nav>
+            <a href="Dashboard.html">🏠 <span>Dashboard</span></a>
+            <a href="TabunganSiswa.html">💰 <span>Tabungan</span></a>
+            <a href="NilaiSiswa.html">📊 <span>Nilai</span></a>
+            <a href="JadwalMengajar.html" class="active">📅 <span>Jadwal</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">🚪 <span>Keluar</span></button>
+        </div>
+    </aside>
+
+    <div id="main-wrapper">
+        <main class="container">
+            <header>
+                <h2>📅 Jadwal Mengajar Guru</h2>
+            </header>
+            
+            <form id="form-jadwal">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Hari</label>
+                        <select id="pilih-hari" required>
+                            <option value="" disabled selected>Pilih Hari</option>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Waktu Mulai</label>
+                        <input type="time" id="jam-mulai" min="07:00" max="15:00" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Mata Pelajaran</label>
+                        <select id="pilih-mapel" required>
+                            <option value="" disabled selected>Pilih Mapel</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Kelas</label>
+                        <select id="pilih-kelas" required>
+                            <option value="" disabled selected>Pilih Kelas</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Tambah</button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Hari</th>
+                            <th>Mata Pelajaran & Kelas</th>
+                            <th style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="isian-jadwal">
+                        </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { 
+            ambilDariServer, simpanKeServer, hapusDiServer, 
+            cekAkses, logout, inisialisasiDataMaster 
+        } from './script.js';
+
+        window.logout = logout;
+        window.hapusJadwal = async (id) => {
+            await hapusDiServer('jadwal', id, renderTabelJadwal);
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            cekAkses();
+            await inisialisasiDataMaster();
+            renderTabelJadwal();
+        });
+
+        async function renderTabelJadwal() {
+            const wadah = document.getElementById('isian-jadwal');
+            const data = await ambilDariServer('jadwal');
+            
+            if (!data || data.length === 0) {
+                wadah.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#999;">Belum ada jadwal mengajar.</td></tr>';
+                return;
+            }
+
+            const urutanHari = { "Senin":1, "Selasa":2, "Rabu":3, "Kamis":4, "Jumat":5 };
+            data.sort((a, b) => urutanHari[a.hari] - urutanHari[b.hari] || a.jam.localeCompare(b.jam));
+
+            wadah.innerHTML = data.map(item => `
+                <tr>
+                    <td><strong>${item.jam}</strong></td>
+                    <td>${item.hari}</td>
+                    <td>
+                        <span style="margin-right:8px;">${item.mapel}</span>
+                        <span class="badge-kelas">${item.kelas}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <button onclick="hapusJadwal('${item.id}')" class="btn-hapus">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('form-jadwal').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                hari: document.getElementById('pilih-hari').value,
+                jam: document.getElementById('jam-mulai').value,
+                mapel: document.getElementById('pilih-mapel').value,
+                kelas: document.getElementById('pilih-kelas').value
+            };
+            
+            await simpanKeServer('jadwal', payload, () => {
+                renderTabelJadwal();
+                e.target.reset();
+            });
+        });
+    </script>
+</body>
+</html>

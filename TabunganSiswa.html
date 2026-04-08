@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabungan Siswa - SEBEL</title>
+    <link rel="stylesheet" href="./Styles/DashboardForm.css"> <link rel="stylesheet" href="./Styles/TabunganSiswa.css"> </head>
+<body>
+    <div class="layout">
+        <aside>
+            <div class="sidebar-logo"><h3>SEBEL</h3></div>
+            <nav>
+                <a href="./DashboardForm.html">🏠 <span>Dashboard</span></a>
+                <a href="./TabunganSiswa.html" class="active">💰 <span>Tabungan</span></a>
+                <a href="./NilaiSiswa.html">📊 <span>Nilai</span></a>
+                <a href="./JadwalMengajar.html">📅 <span>Jadwal</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">🚪 <span>Logout</span></button>
+            </div>
+        </aside>
+
+        <div id="main-wrapper">
+            <header>
+                <div class="user-profile">
+                    <span id="display-user-name">👤 Memuat...</span>
+                </div>
+            </header>
+
+            <main class="container">
+                <h2>Analisis Transaksi Tabungan</h2>
+                
+                <form id="form-tabungan-db" class="form-inline">
+                    <div class="field">
+                        <label>Pilih Rombel (Kelas)</label>
+                        <select id="id_rombel" class="form-control" onchange="updateSiswaDinamis()" required>
+                            <option value="" disabled selected>-- Pilih Kelas --</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Nama Siswa</label>
+                        <select id="nis_siswa" required>
+                            <option value="" disabled selected>-- Pilih Siswa --</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Nominal (Rp)</label>
+                        <input type="number" id="jumlah_uang" placeholder="Contoh: 50000" required>
+                    </div>
+                    <div class="field">
+                        <label>Keterangan</label>
+                        <input type="text" id="keterangan_transaksi" placeholder="Catatan tambahan">
+                    </div>
+                    <button type="submit" class="btn-primary">Proses Transaksi</button>
+                </form>
+
+                <hr>
+                
+                <h3>Riwayat Transaksi Terakhir</h3>
+                <div class="table-responsive">
+                    <table class="tabel">
+                        <thead>
+                            <tr class="baris-judul">
+                                <th>Tanggal</th>
+                                <th>Siswa</th>
+                                <th>Masuk</th>
+                                <th>Keterangan</th>
+                                <th>Petugas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-transaksi-tabungan">
+                            </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script type="module" src="TabunganLogic.js"></script>
+    <script type="module">
+        import { cekAkses } from "./script.js";
+        cekAkses();
+
+        const BASE_URL = "http://localhost:3000/api";
+        const token = localStorage.getItem('token');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userName = localStorage.getItem('userName') || 'Guru';
+            document.getElementById('display-user-name').textContent = `👤 ${userName}`;
+
+            try {
+                const response = await fetch(`${BASE_URL}/daftar-kelas`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const daftarKelas = await response.json();
+                
+                const selectRombel = document.getElementById('id_rombel');
+                selectRombel.innerHTML = '<option value="" disabled selected>-- Pilih Kelas --</option>';
+                
+                daftarKelas.forEach(rombel => {
+                    const opt = new Option(rombel.nama_kelas, rombel.id_rombel);
+                    selectRombel.add(opt);
+                });
+            } catch (err) {
+                console.error("Gagal memuat kelas:", err);
+            }
+        });
+
+        window.updateSiswaDinamis = async () => {
+            const idRombel = document.getElementById('id_rombel').value;
+            const selectSiswa = document.getElementById('nis_siswa');
+            
+            selectSiswa.innerHTML = '<option value="">Memuat...</option>';
+
+            try {
+                const response = await fetch(`${BASE_URL}/daftar-siswa/${idRombel}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const daftarSiswa = await response.json();
+
+                selectSiswa.innerHTML = '<option value="" disabled selected>-- Pilih Siswa --</option>';
+                daftarSiswa.forEach(siswa => {
+                    selectSiswa.add(new Option(siswa.nama_siswa, siswa.nama_siswa));
+                });
+            } catch (err) {
+                selectSiswa.innerHTML = '<option value="">Gagal memuat siswa</option>';
+            }
+        };
+    </script>
+</body>
+</html>
